@@ -48,6 +48,28 @@ When starting a new behaviour, work in this order:
 4. Run the full test suite to verify no unintended side effects across the whole codebase.
 5. Ask the user if they want to commit the cycle, wait for their input, and once they give you the go-ahead, return to Red for the next slice.
 
+## Component Extraction
+
+When extracting a component out of an existing page or parent component:
+
+1. Add `data-testid="<component-name>"` to the extracted component's root element.
+2. In the **parent's test file**, write a test that asserts `getByTestId('<component-name>')` is in the document — verifying the parent still renders it.
+3. The parent-level test must **not** assert on the component's internal content — that belongs in the component's own test file.
+
+```tsx
+// ✅ Parent test — presence only, no internal content
+it('renders the sidebar', () => {
+  render(<Dashboard />);
+  expect(screen.getByTestId('sidebar')).toBeInTheDocument();
+});
+
+// ✅ Component test — owns the content assertions
+it('renders all main navigation links', () => {
+  render(<Sidebar />);
+  expect(screen.getByRole('link', { name: /dashboard/i })).toBeVisible();
+});
+```
+
 ## Rules
 - NO PRODUCTION CODE WITHOUT A FAILING TEST FIRST.
 - If you wrote code before a test existed, delete it entirely. Do not adapt it — unverified code is technical debt.
